@@ -10,11 +10,11 @@ public class StatusMsg {
     private int errorCode;
     private String errorMessage;
     private Object data;
-
-    public StatusMsg() {
-        this.returnCode="F";
-        this.errorCode = StatusEnum.BAD_REQUEST.getCode();
-        this.errorMessage = StatusEnum.BAD_REQUEST.getMessage();
-        this.data = null;
-    }
+//
+//    public StatusMsg() {
+//        this.returnCode="F";
+//        this.errorCode = StatusEnum.BAD_REQUEST.getCode();
+//        this.errorMessage = StatusEnum.BAD_REQUEST.getMessage();
+//        this.data = null;
+//    }
 }

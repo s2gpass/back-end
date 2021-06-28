@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <springProperty name="application-name" source="spring.application.name" defaultValue="S2G" />
+  <springProperty name="instance-id" source="spring.profiles.instance" defaultValue="InstTb" />
+  <springProperty name="log-path" source="logging.file.path" defaultValue="./tmp"/>
+
+	<appender name="CONSOLE-PROCESS" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>[%d{HH:mm:ss.SSS}][%-1.-1p][%thread][%logger][%L] %m%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILE-PROCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<pattern>[%d{HH:mm:ss.SSS}][%-1.-1p][%thread][%logger][%L] %m%n</pattern>
+		</encoder>
+		<!-- apllication.yml profile 별 logging.file, logging.path 설정 값 로드 -->
+		<file>${log-path}/${application-name}_${instance-id}_process.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${log-path}/backup/${application-name}_${instance-id}_process.log.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+			<maxFileSize>300MB</maxFileSize>
+			<maxHistory>90</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<appender name="FILE-TRANSACTION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<pattern>%m%n</pattern>
+		</encoder>
+		<file>${log-path}/${application-name}_${instance-id}_transaction.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${log-path}/backup/${application-name}_${instance-id}_transaction.log.%d{yyyy-MM-dd}.%i.gz
+			</fileNamePattern>
+			<maxFileSize>300MB</maxFileSize>
+			<maxHistory>90</maxHistory>
+		</rollingPolicy>
+	</appender>
+	
+	<appender name="SQL-TRANSACTION" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<pattern>[%d{HH:mm:ss.SSS}][%logger] %m%n</pattern>
+		</encoder>
+		<file>${log-path}/${application-name}_${instance-id}_sql.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${log-path}/backup/${application-name}_${instance-id}_sql.log.%d{yyyy-MM-dd}.%i
+			</fileNamePattern>
+			<maxFileSize>100MB</maxFileSize>
+			<maxHistory>90</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<appender name="CONSOLE-TRANSACTION" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>[%d{HH:mm:ss.SSS}][%-1.-1p][%thread][%logger][%L] %m%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="com.kt.S2G.conf.RestTemplateLoggingInterceptor" level="DEBUG">
+		<appender-ref ref="FILE-TRANSACTION" />
+	</logger>
+	
+	<logger name="com.kt.S2G.utils.FCMUtil" level="INFO">
+		<appender-ref ref="FILE-TRANSACTION" />
+	</logger>
+	<!-- 
+	<logger name="com.kt.S2G.hist.account.mapper.LoginHistMapper" level="TRACE" /> -->
+
+	<springProfile name="default">
+		<logger name="org.springframework" level="INFO" />
+		<logger name="org.apache" level="INFO" />
+
+		<root level="INFO">
+			<appender-ref ref="CONSOLE-PROCESS" />
+			<appender-ref ref="FILE-PROCESS" />
+		</root>
+		<logger name="S2G_TRANSACTION" additivity="false" level="INFO">
+			<appender-ref ref="FILE-TRANSACTION" />
+			<appender-ref ref="CONSOLE-TRANSACTION" />
+			<!-- <appender-ref ref="SQL-TRANSACTION" />  -->
+		</logger>
+	</springProfile>
+
+	<springProfile name="prd">
+ 		<logger name="org.springframework" level="INFO" />
+		<logger name="org.apache" level="INFO" />
+
+		<root level="INFO">
+			<appender-ref ref="CONSOLE-PROCESS" />
+			<!-- <appender-ref ref="FILE-PROCESS" /> -->
+		</root>
+		<logger name="S2G_TRANSACTION" additivity="false" level="TRACE">
+			<appender-ref ref="FILE-TRANSACTION" />
+			<appender-ref ref="CONSOLE-TRANSACTION" />
+			<!-- <appender-ref ref="SQL-TRANSACTION" /> -->
+		</logger>
+	</springProfile>
+
+	<springProfile name="dev">
+		<logger name="org.springframework" level="INFO" />
+		<logger name="org.apache" level="INFO" />
+
+		<root level="INFO">
+			<appender-ref ref="CONSOLE-PROCESS" />
+			<appender-ref ref="FILE-PROCESS" />
+		</root>
+		<logger name="S2G_TRANSACTION" additivity="false" level="INFO">
+			<appender-ref ref="FILE-TRANSACTION" />
+			<appender-ref ref="CONSOLE-TRANSACTION" />
+			<appender-ref ref="SQL-TRANSACTION" />
+		</logger>
+	</springProfile>
+
+	<springProfile name="stg">
+ 		<logger name="org.springframework" level="INFO" />
+		<logger name="org.apache" level="INFO" />
+		
+		<root level="INFO">
+			<appender-ref ref="CONSOLE-PROCESS" />
+			<appender-ref ref="FILE-PROCESS" />
+		</root>
+		<logger name="S2G_TRANSACTION" additivity="false" level="INFO">
+			<appender-ref ref="FILE-TRANSACTION" />
+			<appender-ref ref="CONSOLE-TRANSACTION" />
+			<!-- <appender-ref ref="SQL-TRANSACTION" /> -->
+		</logger>
+	</springProfile>
+
+	<springProfile name="local">
+		<logger name="org.springframework" level="INFO" />
+		<logger name="org.apache" level="INFO" />
+
+		<root level="INFO">
+			<appender-ref ref="CONSOLE-PROCESS" />
+			<appender-ref ref="FILE-PROCESS" />
+		</root>
+		<logger name="S2G_TRANSACTION" additivity="false" level="INFO">
+			<appender-ref ref="FILE-TRANSACTION" />
+			<appender-ref ref="CONSOLE-TRANSACTION" />
+			<appender-ref ref="SQL-TRANSACTION" />
+		</logger>
+	</springProfile>
+
+	<springProfile name="tb">
+		<logger name="org.springframework" level="INFO" />
+		<logger name="org.apache" level="INFO" />
+
+		<root level="INFO">
+			<appender-ref ref="FILE-PROCESS" />
+		</root>
+		
+		<logger name="S2G_TRANSACTION" additivity="false" level="INFO">
+			<appender-ref ref="FILE-TRANSACTION" />
+		</logger>
+	</springProfile>
+
+</configuration>

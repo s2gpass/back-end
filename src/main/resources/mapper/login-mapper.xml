@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kt.safe2go.platform.api.auth.dao.LoginMapper">
+
+	
+	
+	<!-- 10분 이내 -->
+	<select id="selectAuthIpCheck" resultType="String">
+		SELECT
+		COUNT(*)
+		FROM T_AUTH_SMS 
+		WHERE REQ_DATE >= NOW() - INTERVAL '10 minute' 
+		AND  USER_IP = #{USER_IP}
+	</select>
+	
+	<!--SMS인증키 저장-->
+	<insert id="insertAuth">
+		INSERT INTO T_AUTH_SMS(
+			recv_ctn,
+			req_date, 
+			req_type, 
+			send_sms, 
+			fail_cnt, 
+			user_ip)
+		VALUES(
+			#{RECV_CTN}, 
+			now(), 
+			#{REQ_TYPE}, 
+			#{SMS_KEY}, 
+			0, 
+			#{USER_IP}
+		)
+	</insert>
+
+    <select id="authSMSChk" resultType="int">
+        select count(*)
+        from t_auth_sms tas2 
+        where tas2.send_sms =#{SEND_SMS}
+        and tas2.recv_ctn = #{PHONE_NUM}
+        and tas2.use_yn = 'N'
+        and req_type=#{REQ_TYPE}
+        and tas2.req_date >= now() - interval '5 minute'
+
+
+    </select>
+
+    <update id="authSMSChkSuccess">
+        update t_auth_sms
+        set use_yn = 'Y'
+        where recv_ctn =#{PHONE_NUM}
+        and send_sms =#{SEND_SMS}
+        and req_type=#{REQ_TYPE}
+    </update>
+
+    <update id="authSMSChkFail">
+        update t_auth_sms
+        set fail_cnt = fail_cnt + 1
+        where recv_ctn =#{PHONE_NUM}
+        and req_type=#{REQ_TYPE}
+        and use_yn='N'
+        and req_date = (
+            select max(tas.req_date)
+            from t_auth_sms tas 
+            where tas.recv_ctn =#{PHONE_NUM}
+            and tas.req_type='2'
+            and tas.use_yn='N'
+        )
+    </update>
+
+    <insert id="insertSign">
+        insert into comm.testtb (
+              test
+            , aa 	 
+        )
+        values(
+              #{test}
+            , #{aa}
+           
+        )
+    </insert>
+
+
+    <update id="loginCntHist">
+        update t_onm_mem 
+        set login_cnt = login_cnt + 1, login_date = now()
+        where mobile_num =#{PHONE_NUM}   
+    </update>
+
+    <insert id="insertIpCngReq">
+        insert into t_onm_mem_upd_req(
+            onm_id
+            , upd_type
+            , upd_desc
+            , old_desc
+        )
+        values(
+            #{ONM_ID}
+            , 'I'
+            , #{UPD_IP}
+            , #{OLD_IP}
+        )
+    </insert>
+
+    <select id="loginIpChk" resultType="camelMap">
+        with get_t_onm_mem as (
+            select *
+            from t_onm_mem tom 
+            where tom.mobile_num =#{PHONE_NUM}
+        ),
+        get_t_onm_ip as (
+            select *
+            from t_onm_ip toi 
+            where toi.use_yn ='Y'
+        )
+        select coalesce(get_t_onm_mem.access_ip ,'-') access_ip
+        from get_t_onm_mem, get_t_onm_ip
+        where get_t_onm_mem.access_ip = get_t_onm_ip.access_ip
+    </select>
+
+	<insert id="insertLoginHist">
+		INSERT INTO 
+		t_onm_login_hist
+		(
+			  seq 
+			, onm_id
+			, company
+			, department
+			, access_ip
+			, login_date
+			, reg_date
+		)
+		VALUES
+		(
+			  NEXTVAL('t_onm_login_hist_seq_seq'::regclass)
+			, #{onmId}
+			, #{compony}
+			, #{department}
+			, #{accessIp}
+			, NOW()
+			, NOW()
+		)
+	</insert>
+	
+	<update id="updateLoginHist">
+		UPDATE t_onm_login_hist 
+		SET logout_date = NOW()
+		WHERE seq = 
+		(
+			SELECT 
+				seq 
+			FROM t_onm_login_hist
+			WHERE 1=1
+			AND onm_id = #{onmId}
+			ORDER BY login_date DESC 
+			LIMIT 1
+		)
+	</update>
+	
+	<update id="updateUserName">
+		UPDATE t_onm_mem 
+		SET user_nm = #{userNm}
+		WHERE onm_id = #{onmId}
+	</update>
+
+</mapper>

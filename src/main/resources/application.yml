@@ -1,0 +1,88 @@
+# Embedded Tomcat Configuration 
+server:
+  port: 8080
+  tomcat: 
+    uri-encoding: UTF-8
+#    accesslog:
+#      enabled: true
+#      pattern: "%h %l %u %t '%r' %s %b %D"
+#      rotate: true
+#      prefix: access
+#      suffix: .log
+#      file-date-format: .yyyy-MM-dd
+#      directory: /jb_log/safe2go/access
+    
+    threads:
+      max:  200
+      min-spare:  10
+    accept-count: 100
+    
+#Spring Default Configuration 
+spring:
+  application:
+    name: safe2go-platform
+  profiles: 
+    active: local
+    instance: s2g
+  datasource:
+  #  type: org.apache.tomcat.jdbc.pool.DataSource
+    driver-class-name: org.postgresql.Driver
+    jdbc-url: jdbc:postgresql://safe2go.cp7mbhug0tnq.us-west-2.rds.amazonaws.com/safe2go
+    username: safe2go
+    password: safe2go12!@
+    tomcat:
+      remove-abandoned: true
+      remove-abandoned-timeout: 120
+      log-abandoned: true
+      max-active: 50
+      max-idle: 10
+      max-wait: 1000
+      #validation-query: "select 1"
+      #test-on-borrow: true
+      #test-on-connect: true
+      test-while-idle: true
+
+    
+#MyBatis Configuration 
+mybatis:
+ config-location: classpath:config.mybatis.xml
+   
+
+## Transaction log
+common-log:
+  properties: 
+    inReq: true
+    inRes: true
+    access: true
+  masking: 
+    enabled: true
+    target:
+    - otp
+    - sendEmailResult
+    - getEmailResult
+    - subscription
+    - loginott
+    - setopbox
+    - iptvInfo
+    - inquiryotpid
+    rule:
+      phone: all
+      phoneNum: all
+      phoneNumber: all
+      email: all
+      customerName: all
+      emailAddress: all
+  bodyType:
+    XML:
+    - application/xml
+    JSON:
+    - application/json
+    - application/vnd.spring-boot.actuator.v3+json
+    QUERYSTRING:
+    - application/x-www-form-urlencoded
+  xmlResUnchecked: # If the return code of xml response API is not F, change the return code to S.
+  - LinearTV Delivery Request,Package Delivery Data
+  - Service Provider Delivery Data
+  txResBodyNotLogging: 
+  - test 
+
